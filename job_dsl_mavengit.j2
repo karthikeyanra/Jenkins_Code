@@ -1,0 +1,30 @@
+job('dsl_test_maven') {
+
+    description("Create Jenkins Job via DSL - fetch code from git repo and execute Maven")
+
+    scm {
+            git {
+                remote {
+                    url('https://github.com/jenkins-docs/simple-java-maven-app.git')
+                }
+            branch('*/master')
+         }
+    }
+    
+    steps {
+            maven {
+                mavenInstallation('Jenkins-Maven')
+                goals('-B -DskipTests clean package')
+            }
+
+            maven {
+                mavenInstallation('Jenkins-Maven')
+                goals('test')
+            }
+            
+            shell("""
+                echo "*** Deployment start ***"
+                java -jar /var/jenkins_home/workspace/dsl_test_maven/target/my-app-1.0-SNAPSHOT.jar
+            """)
+    }
+}
